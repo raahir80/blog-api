@@ -2,17 +2,16 @@ const User = require("../../model/User/User");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../../utils/generateToken");
 const getTokenFromHeader = require("../../utils/getTokenFromHeader");
+const {appErr,AppErr} = require("../../utils/appErr");
 
 //Register
-const userRegisterCtrl = async (req, res) => {
+const userRegisterCtrl = async (req, res,next) => {
   const { firstname, lastname, profilePhoto, email, password } = req.body;
   try {
     //check if email exist
     const userFound = await User.findOne({ email });
     if (userFound) {
-      return res.json({
-        msg: "User Already Exist",
-      });
+      return next(new AppErr("User Already Exist",500))
     }
 
     // hash password
@@ -30,7 +29,7 @@ const userRegisterCtrl = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    res.json(error.message);
+    next(appErr(error.message));
   }
 };
 
